@@ -15,7 +15,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { FolderIcon, Plus, Edit, Trash, ChevronRight } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 
 interface FolderSidebarProps {
   folders: Folder[]
@@ -140,33 +139,37 @@ export function FolderSidebar({
 
       <div className='space-y-2'>
         <Card
-          className={`cursor-pointer hover:bg-accent ${selectedFolder === null ? 'bg-accent' : ''}`}
+          className={`cursor-pointer ${selectedFolder === null ? 'bg-accent text-muted' : 'hover:bg-accent  hover:text-muted'}`}
           onClick={() => onSelectFolder(null)}
         >
           <CardContent className='p-3 flex justify-between items-center'>
             <div className='flex items-center'>
-              <FolderIcon className='h-4 w-4 mr-2 text-muted-foreground' />
+              <FolderIcon
+                className={`h-4 w-4 mr-2  ${selectedFolder === null ? 'text-muted' : ''}`}
+              />
               <span>All Bookmarks</span>
             </div>
             <div className='flex items-center'>
-              <Badge variant='secondary'>{bookmarks.length}</Badge>
-              <ChevronRight className='h-4 w-4 ml-1 text-muted-foreground' />
+              <p>{bookmarks.length}</p>
+              <ChevronRight className={`h-4 w-4 ml-1`} />
             </div>
           </CardContent>
         </Card>
 
         <Card
-          className={`cursor-pointer hover:bg-accent ${selectedFolder === 'uncategorized' ? 'bg-accent' : ''}`}
+          className={`cursor-pointer ${selectedFolder === 'uncategorized' ? 'bg-accent text-muted' : 'hover:bg-accent  hover:text-muted'}`}
           onClick={() => onSelectFolder('uncategorized')}
         >
           <CardContent className='p-3 flex justify-between items-center'>
             <div className='flex items-center'>
-              <FolderIcon className='h-4 w-4 mr-2 text-muted-foreground' />
+              <FolderIcon
+                className={`h-4 w-4 mr-2  ${selectedFolder === 'uncategorized' ? 'text-muted' : ''}`}
+              />
               <span>Uncategorized</span>
             </div>
             <div className='flex items-center'>
-              <Badge variant='secondary'>{getBookmarkCount(null)}</Badge>
-              <ChevronRight className='h-4 w-4 ml-1 text-muted-foreground' />
+              <p>{getBookmarkCount(null)}</p>
+              <ChevronRight className='h-4 w-4 ml-1 ' />
             </div>
           </CardContent>
         </Card>
@@ -174,7 +177,7 @@ export function FolderSidebar({
         {folders.map((folder) => (
           <Card
             key={folder.id}
-            className={`hover:bg-accent ${selectedFolder === folder.id ? 'bg-accent' : ''}`}
+            className={`${selectedFolder === folder.id ? 'bg-accent text-muted' : 'hover:bg-accent  hover:text-muted'}`}
           >
             <CardContent className='p-3'>
               {editingId === folder.id ? (
@@ -199,13 +202,13 @@ export function FolderSidebar({
                     className='flex items-center flex-1 cursor-pointer'
                     onClick={() => onSelectFolder(folder.id)}
                   >
-                    <FolderIcon className='h-4 w-4 mr-2 text-muted-foreground' />
+                    <FolderIcon
+                      className={`h-4 w-4 mr-2  ${selectedFolder === folder.id ? 'text-muted' : ''}`}
+                    />
                     <span>{folder.name}</span>
                   </div>
                   <div className='flex items-center'>
-                    <Badge variant='secondary' className='mr-2'>
-                      {getBookmarkCount(folder.id)}
-                    </Badge>
+                    <p className='mr-2'>{getBookmarkCount(folder.id)}</p>
                     <Button
                       variant='ghost'
                       size='icon'

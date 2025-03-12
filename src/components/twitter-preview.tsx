@@ -9,10 +9,14 @@ interface TwitterPreviewProps {
 
 export function TwitterPreview({ tweetId }: TwitterPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const tweetRenderedRef = useRef<boolean>(false)
 
   useEffect(() => {
     // Skip if window.twttr is not available or container is not mounted
     if (!containerRef.current) return
+
+    // Reset the rendered flag when tweet ID changes
+    tweetRenderedRef.current = false
 
     // Clean up any existing tweet
     if (containerRef.current) {
@@ -34,11 +38,20 @@ export function TwitterPreview({ tweetId }: TwitterPreviewProps) {
     }
 
     function renderTweet() {
-      if (window.twttr && containerRef.current) {
+      // Prevent rendering if already rendered or container not available
+      if (!containerRef.current || tweetRenderedRef.current) return
+
+      // Clear the container before rendering
+      containerRef.current.innerHTML = ""
+
+      if (window.twttr) {
         window.twttr.widgets.createTweet(tweetId, containerRef.current, {
           theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
           dnt: true,
           width: "100%",
+        }).then(() => {
+          // Mark as rendered after successful rendering
+          tweetRenderedRef.current = true
         })
       }
     }
@@ -51,6 +64,8 @@ export function TwitterPreview({ tweetId }: TwitterPreviewProps) {
           mutation.attributeName === "class" &&
           mutation.target === document.documentElement
         ) {
+          // Reset rendered flag when theme changes
+          tweetRenderedRef.current = false
           renderTweet()
         }
       })
@@ -63,6 +78,10 @@ export function TwitterPreview({ tweetId }: TwitterPreviewProps) {
 
     return () => {
       observer.disconnect()
+      // Clean up when unmounting or when tweetId changes
+      if (containerRef.current) {
+        containerRef.current.innerHTML = ""
+      }
     }
   }, [tweetId])
 

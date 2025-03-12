@@ -14,6 +14,7 @@
     --primary-foreground: 210 16% 98%; /* gray-50 */
     --secondary: 210 16% 98%; /* gray-50 */
     --secondary-foreground: 248 56% 33%; /* indigo-700 */
+    --accent: 249 60% 35%;
     --accent-foreground: 0 0% 100%; /* white */
     --muted: 210 11% 84%; /* gray-300 */
     --muted-foreground: 248 56% 33%; /* indigo-700 */
@@ -24,30 +25,25 @@
     --ring: 24 94% 53%; /* coral-500 */
   }
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 222 47% 11%; /* gray-900 */
+    --foreground: 210 11% 96%; /* gray-100 */
+    --card: 222 47% 11%; /* gray-900 */
+    --card-foreground: 210 11% 96%; /* gray-100 */
+    --popover: 222 47% 11%; /* gray-900 */
+    --popover-foreground: 210 11% 96%; /* gray-100 */
+    --primary: 210 11% 96%; /* gray-100 */
+    --primary-foreground: 222 47% 11%; /* gray-900 */
+    --secondary: 222 47% 11%; /* gray-900 */
+    --secondary-foreground: 210 11% 96%; /* gray-100 */
+    --accent: 24 91% 62%; /* coral-400 */
+    --accent-foreground: 0 0% 0%; /* black */
+    --muted: 215 16% 34%; /* gray-600 */
+    --muted-foreground: 210 11% 96%; /* gray-100 */
+    --destructive: 330 77% 72%; /* pink-400 */
+    --destructive-foreground: 0 0% 100%; /* white */
+    --border: 215 16% 34%; /* gray-600 */
+    --input: 215 16% 34%; /* gray-600 */
+    --ring: 24 91% 62%; /* coral-400 */
   }
 }
 
@@ -57,5 +53,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Manrope', sans-serif;
   }
 }
