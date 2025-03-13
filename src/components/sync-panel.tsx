@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { toast } from 'sonner'
+import { DataInfoCard } from './data-info'
 
 interface SyncPanelProps {
   bookmarks: Bookmark[]
@@ -147,6 +148,7 @@ export function SyncPanel({ bookmarks, folders }: SyncPanelProps) {
 
   return (
     <div className='space-y-6'>
+    <DataInfoCard />
       <Card>
         <CardHeader>
           <CardTitle>Sync Your Bookmarks</CardTitle>

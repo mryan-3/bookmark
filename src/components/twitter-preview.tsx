@@ -11,7 +11,7 @@ interface TwitterPreviewProps {
 export function TwitterPreview({ tweetId }: TwitterPreviewProps) {
   return (
     <div className='light'>
-      <ClientTweetCard id={tweetId} />
+      <ClientTweetCard id={tweetId} className='h-full'/>
     </div>
   )
 }
