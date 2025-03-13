@@ -7,7 +7,7 @@ import { AddBookmarkForm } from '@/components/add-bookmark-form'
 import { SyncPanel } from '@/components/sync-panel'
 import { useBookmarks } from '@/hooks/use-bookmarks'
 import { useFolders } from '@/hooks/use-folders'
-import { Search } from 'lucide-react'
+import { Search, FolderIcon, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -20,6 +20,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [activeTab, setActiveTab] = useState('bookmarks')
 
   const filteredBookmarks = bookmarks.filter((bookmark) => {
     const matchesSearch =
@@ -29,10 +30,18 @@ export default function Home() {
       bookmark.url.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesFolder =
-      selectedFolder === null || bookmark.folderId === selectedFolder
+      selectedFolder === null
+        ? true
+        : selectedFolder === 'uncategorized'
+          ? bookmark.folderId === null
+          : bookmark.folderId === selectedFolder
 
     return matchesSearch && matchesFolder
   })
+  const handleFolderClick = (folderId: string | null) => {
+    setSelectedFolder(folderId)
+    setActiveTab('bookmarks') // Switch to bookmarks tab when a folder is clicked
+  }
 
   return (
     <div className='flex flex-col min-h-screen'>
@@ -73,7 +82,7 @@ export default function Home() {
         </div>
       </header>
 
-      <Tabs defaultValue='bookmarks' className='flex-1'>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='flex-1'>
         <div className='container px-4 pt-4'>
           <TabsList>
             <TabsTrigger value='bookmarks'>Bookmarks</TabsTrigger>
@@ -84,6 +93,27 @@ export default function Home() {
 
         <TabsContent value='bookmarks' className='flex-1 p-0'>
           <div className='container px-4 py-4'>
+            {selectedFolder && (
+              <div className='mb-4 flex items-center'>
+                <div className='bg-muted px-3 py-1 rounded-md flex items-center'>
+                  <FolderIcon className='h-4 w-4 mr-2 text-muted-foreground' />
+                  <span className='font-medium'>
+                    {selectedFolder === 'uncategorized'
+                      ? 'Uncategorized'
+                      : folders.find((f) => f.id === selectedFolder)?.name ||
+                        ''}
+                  </span>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='ml-2 h-6 w-6 p-0'
+                    onClick={() => setSelectedFolder(null)}
+                  >
+                    <X className='h-4 w-4' />
+                  </Button>
+                </div>
+              </div>
+            )}
             <BookmarkList
               bookmarks={filteredBookmarks}
               folders={folders}
@@ -103,6 +133,7 @@ export default function Home() {
               onRemoveFolder={removeFolder}
               onUpdateFolder={updateFolder}
               bookmarks={bookmarks}
+              onFolderClick={handleFolderClick}
             />
           </div>
         </TabsContent>

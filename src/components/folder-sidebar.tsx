@@ -24,6 +24,7 @@ interface FolderSidebarProps {
   onRemoveFolder: (id: string) => void
   onUpdateFolder: (id: string, folder: Partial<Folder>) => void
   bookmarks: Bookmark[]
+  onFolderClick: (id: string | null) => void
 }
 
 export function FolderSidebar({
@@ -34,6 +35,7 @@ export function FolderSidebar({
   onRemoveFolder,
   onUpdateFolder,
   bookmarks,
+  onFolderClick,
 }: FolderSidebarProps) {
   const [newFolderName, setNewFolderName] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -54,7 +56,8 @@ export function FolderSidebar({
     setIsAddDialogOpen(false)
   }
 
-  const startEditing = (folder: Folder) => {
+  const startEditing = (folder: Folder, e: React.MouseEvent) => {
+    e.stopPropagation()
     setEditingId(folder.id)
     setEditName(folder.name)
   }
@@ -66,7 +69,8 @@ export function FolderSidebar({
     setEditingId(null)
   }
 
-  const cancelEdit = () => {
+  const cancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation()
     setEditingId(null)
   }
 
@@ -74,7 +78,8 @@ export function FolderSidebar({
     return bookmarks.filter((b) => b.folderId === folderId).length
   }
 
-  const handleRemoveFolder = (id: string) => {
+  const handleRemoveFolder = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
     // Check if folder has bookmarks
     const hasBookmarks = bookmarks.some((b) => b.folderId === id)
 
@@ -92,6 +97,15 @@ export function FolderSidebar({
 
     if (selectedFolder === id) {
       onSelectFolder(null)
+    }
+  }
+
+  const handleFolderClick = (id: string | null) => {
+    onSelectFolder(id)
+
+    // If onFolderClick is provided, call it to switch to the bookmarks tab
+    if (onFolderClick) {
+      onFolderClick(id)
     }
   }
 
@@ -140,7 +154,7 @@ export function FolderSidebar({
       <div className='space-y-2'>
         <Card
           className={`cursor-pointer ${selectedFolder === null ? 'bg-accent text-muted' : 'hover:bg-accent  hover:text-muted'}`}
-          onClick={() => onSelectFolder(null)}
+          onClick={() => handleFolderClick(null)}
         >
           <CardContent className='p-3 flex justify-between items-center'>
             <div className='flex items-center'>
@@ -158,7 +172,7 @@ export function FolderSidebar({
 
         <Card
           className={`cursor-pointer ${selectedFolder === 'uncategorized' ? 'bg-accent text-muted' : 'hover:bg-accent  hover:text-muted'}`}
-          onClick={() => onSelectFolder('uncategorized')}
+          onClick={() => handleFolderClick('uncategorized')}
         >
           <CardContent className='p-3 flex justify-between items-center'>
             <div className='flex items-center'>
@@ -178,10 +192,11 @@ export function FolderSidebar({
           <Card
             key={folder.id}
             className={`${selectedFolder === folder.id ? 'bg-accent text-muted' : 'hover:bg-accent  hover:text-muted'}`}
+            onClick={() => handleFolderClick(folder.id)}
           >
             <CardContent className='p-3'>
               {editingId === folder.id ? (
-                <div className='flex items-center space-x-2'>
+                <div className='flex items-center space-x-2' onClick={(e) => e.stopPropagation()}>
                   <Input
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
@@ -189,7 +204,7 @@ export function FolderSidebar({
                     className='flex-1'
                     autoFocus
                   />
-                  <Button size='sm' variant='ghost' onClick={cancelEdit}>
+                  <Button size='sm' variant='ghost' onClick={(e) => cancelEdit(e)}>
                     Cancel
                   </Button>
                   <Button size='sm' onClick={() => saveEdit(folder.id)}>
@@ -200,7 +215,6 @@ export function FolderSidebar({
                 <div className='flex justify-between items-center'>
                   <div
                     className='flex items-center flex-1 cursor-pointer'
-                    onClick={() => onSelectFolder(folder.id)}
                   >
                     <FolderIcon
                       className={`h-4 w-4 mr-2  ${selectedFolder === folder.id ? 'text-muted' : ''}`}
@@ -212,14 +226,14 @@ export function FolderSidebar({
                     <Button
                       variant='ghost'
                       size='icon'
-                      onClick={() => startEditing(folder)}
+                      onClick={(e) => startEditing(folder, e)}
                     >
                       <Edit className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='icon'
-                      onClick={() => handleRemoveFolder(folder.id)}
+                      onClick={(e) => handleRemoveFolder(folder.id, e)}
                     >
                       <Trash className='h-4 w-4' />
                     </Button>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Bookmark, Folder } from '@/types'
 import {
   Card,
@@ -24,13 +24,15 @@ import { extractTwitterId } from '@/lib/utils'
 import { Edit, Trash, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
-import { ConfirmationDialog } from './confirmation-dialog'
+import { ConfirmationDialog } from '@/components/confirmation-dialog'
 
 interface BookmarkListProps {
   bookmarks: Bookmark[]
   folders: Folder[]
   onRemove: (id: string) => void
   onUpdate: (id: string, bookmark: Partial<Bookmark>) => void
+  searchQuery?: string
+  selectedFolder?: string | null
 }
 
 export function BookmarkList({
@@ -38,13 +40,51 @@ export function BookmarkList({
   folders,
   onRemove,
   onUpdate,
+  searchQuery = '',
+  selectedFolder = null,
 }: BookmarkListProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editNotes, setEditNotes] = useState('')
   const [editFolderId, setEditFolderId] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [bookmarkToDelete, setBookmarkToDelete] = useState<string | null>(null)
+  const [matchedBookmarks, setMatchedBookmarks] = useState<
+    Record<string, string[]>
+  >({})
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setMatchedBookmarks({})
+      return
+    }
+
+    const matches: Record<string, string[]> = {}
+
+    bookmarks.forEach((bookmark) => {
+      if (
+        bookmark.tweetContent &&
+        bookmark.tweetContent
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) &&
+        !bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !(bookmark.notes || '')
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      ) {
+        // Find the context around the match
+        const content = bookmark.tweetContent.toLowerCase()
+        const index = content.indexOf(searchQuery.toLowerCase())
+        const start = Math.max(0, index - 20)
+        const end = Math.min(content.length, index + searchQuery.length + 20)
+        const context = bookmark.tweetContent.substring(start, end)
+
+        matches[bookmark.id] = [context]
+      }
+    })
+
+    setMatchedBookmarks(matches)
+  }, [searchQuery, bookmarks])
 
   const startEditing = (bookmark: Bookmark) => {
     setEditingId(bookmark.id)
@@ -65,6 +105,7 @@ export function BookmarkList({
   const cancelEdit = () => {
     setEditingId(null)
   }
+
   const confirmDelete = (id: string) => {
     setBookmarkToDelete(id)
     setDeleteDialogOpen(true)
@@ -82,10 +123,18 @@ export function BookmarkList({
     return (
       <div className='text-center py-12'>
         <h3 className='text-lg font-medium text-muted-foreground'>
-          No bookmarks found
+          {searchQuery
+            ? 'No bookmarks match your search'
+            : selectedFolder
+              ? 'No bookmarks in this folder'
+              : 'No bookmarks found'}
         </h3>
         <p className='text-sm text-muted-foreground mt-1'>
-          Add your first Twitter bookmark to get started
+          {searchQuery
+            ? 'Try a different search term'
+            : selectedFolder
+              ? 'Add bookmarks to this folder to see them here'
+              : 'Add your first Twitter bookmark to get started'}
         </p>
       </div>
     )
@@ -99,9 +148,13 @@ export function BookmarkList({
           const folderName = folders.find(
             (f) => f.id === bookmark.folderId,
           )?.name
+          const hasContentMatch = matchedBookmarks[bookmark.id]?.length > 0
 
           return (
-            <Card key={bookmark.id} className='overflow-hidden'>
+            <Card
+              key={bookmark.id}
+              className={`overflow-hidden ${hasContentMatch ? 'ring-1 ring-primary' : ''}`}
+            >
               {editingId === bookmark.id ? (
                 <CardContent className='p-4 space-y-4'>
                   <Input
@@ -170,6 +223,21 @@ export function BookmarkList({
                   </CardHeader>
                   <CardContent className='p-4'>
                     {twitterId && <TwitterPreview tweetId={twitterId} />}
+
+                    {/* Add matched content display */}
+                    {hasContentMatch && (
+                      <div className='mt-3 p-2 bg-primary/5 border border-primary/20 rounded-md'>
+                        <p className='text-xs font-medium text-primary mb-1'>
+                          Matched in tweet content:
+                        </p>
+                        {matchedBookmarks[bookmark.id].map((match, i) => (
+                          <p key={i} className='text-sm'>
+                            "...{match}..."
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
                     {bookmark.notes && (
                       <div className='mt-3 text-sm text-muted-foreground'>
                         {bookmark.notes}
@@ -199,6 +267,7 @@ export function BookmarkList({
           )
         })}
       </div>
+
       <ConfirmationDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
