@@ -5,6 +5,7 @@ export interface Bookmark {
   notes?: string
   folderId: string | null
   createdAt: string
+  tweetContent?: string
 }
 
 export interface Folder {
