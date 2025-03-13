@@ -31,7 +31,7 @@ export function useFolders() {
           // Merge with existing folders
           setFolders((prevFolders) => {
             const existingIds = new Set(prevFolders.map((f) => f.id))
-            const newFolders = parsed.folders.filter((f) => !existingIds.has(f.id))
+            const newFolders = parsed.folders.filter((f:any) => !existingIds.has(f.id))
             return [...prevFolders, ...newFolders]
           })
         }
@@ -47,7 +47,7 @@ export function useFolders() {
       if (importedFolders) {
         setFolders((prevFolders) => {
           const existingIds = new Set(prevFolders.map((f) => f.id))
-          const newFolders = importedFolders.filter((f) => !existingIds.has(f.id))
+          const newFolders = importedFolders.filter((f:any) => !existingIds.has(f.id))
           return [...prevFolders, ...newFolders]
         })
       }

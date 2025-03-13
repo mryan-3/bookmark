@@ -31,7 +31,7 @@ export function useBookmarks() {
           // Merge with existing bookmarks
           setBookmarks((prevBookmarks) => {
             const existingIds = new Set(prevBookmarks.map((b) => b.id))
-            const newBookmarks = parsed.bookmarks.filter((b) => !existingIds.has(b.id))
+            const newBookmarks = parsed.bookmarks.filter((b:any) => !existingIds.has(b.id))
             return [...prevBookmarks, ...newBookmarks]
           })
 
@@ -51,7 +51,7 @@ export function useBookmarks() {
       if (importedBookmarks) {
         setBookmarks((prevBookmarks) => {
           const existingIds = new Set(prevBookmarks.map((b) => b.id))
-          const newBookmarks = importedBookmarks.filter((b) => !existingIds.has(b.id))
+          const newBookmarks = importedBookmarks.filter((b:any) => !existingIds.has(b.id))
           return [...prevBookmarks, ...newBookmarks]
         })
       }
