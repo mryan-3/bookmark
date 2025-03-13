@@ -24,6 +24,7 @@ import { extractTwitterId } from '@/lib/utils'
 import { Edit, Trash, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
+import { ConfirmationDialog } from './confirmation-dialog'
 
 interface BookmarkListProps {
   bookmarks: Bookmark[]
@@ -40,8 +41,10 @@ export function BookmarkList({
 }: BookmarkListProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editNotes, setEditNotes] = useState('')
   const [editFolderId, setEditFolderId] = useState<string | null>(null)
+  const [bookmarkToDelete, setBookmarkToDelete] = useState<string | null>(null)
 
   const startEditing = (bookmark: Bookmark) => {
     setEditingId(bookmark.id)
@@ -62,6 +65,18 @@ export function BookmarkList({
   const cancelEdit = () => {
     setEditingId(null)
   }
+  const confirmDelete = (id: string) => {
+    setBookmarkToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDelete = () => {
+    if (bookmarkToDelete) {
+      onRemove(bookmarkToDelete)
+      setBookmarkToDelete(null)
+    }
+    setDeleteDialogOpen(false)
+  }
 
   if (bookmarks.length === 0) {
     return (
@@ -77,107 +92,122 @@ export function BookmarkList({
   }
 
   return (
-    <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-      {bookmarks.map((bookmark) => {
-        const twitterId = extractTwitterId(bookmark.url)
-        const folderName = folders.find((f) => f.id === bookmark.folderId)?.name
+    <>
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+        {bookmarks.map((bookmark) => {
+          const twitterId = extractTwitterId(bookmark.url)
+          const folderName = folders.find(
+            (f) => f.id === bookmark.folderId,
+          )?.name
 
-        return (
-          <Card key={bookmark.id} className='overflow-hidden'>
-            {editingId === bookmark.id ? (
-              <CardContent className='p-4 space-y-4'>
-                <Input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder='Title'
-                />
-                <Textarea
-                  value={editNotes}
-                  onChange={(e) => setEditNotes(e.target.value)}
-                  placeholder='Notes'
-                  rows={3}
-                />
-                <Select
-                  value={editFolderId || ''}
-                  onValueChange={(value) => setEditFolderId(value || null)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select folder' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>No folder</SelectItem>
-                    {folders.map((folder) => (
-                      <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className='flex justify-end space-x-2'>
-                  <Button variant='outline' onClick={cancelEdit}>
-                    Cancel
-                  </Button>
-                  <Button onClick={() => saveEdit(bookmark.id)}>Save</Button>
-                </div>
-              </CardContent>
-            ) : (
-              <>
-                <CardHeader className='p-4 pb-0'>
-                  <div className='flex justify-between items-start'>
-                    <CardTitle className='text-lg'>{bookmark.title}</CardTitle>
-                    <div className='flex space-x-1'>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        onClick={() => startEditing(bookmark)}
-                      >
-                        <Edit className='h-4 w-4' />
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        onClick={() => onRemove(bookmark.id)}
-                      >
-                        <Trash className='h-4 w-4' />
-                      </Button>
-                    </div>
+          return (
+            <Card key={bookmark.id} className='overflow-hidden'>
+              {editingId === bookmark.id ? (
+                <CardContent className='p-4 space-y-4'>
+                  <Input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder='Title'
+                  />
+                  <Textarea
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                    placeholder='Notes'
+                    rows={3}
+                  />
+                  <Select
+                    value={editFolderId || ''}
+                    onValueChange={(value) => setEditFolderId(value || null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select folder' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='none'>No folder</SelectItem>
+                      {folders.map((folder) => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className='flex justify-end space-x-2'>
+                    <Button variant='outline' onClick={cancelEdit}>
+                      Cancel
+                    </Button>
+                    <Button onClick={() => saveEdit(bookmark.id)}>Save</Button>
                   </div>
-                  {folderName && (
-                    <Badge variant='outline' className='mt-2'>
-                      {folderName}
-                    </Badge>
-                  )}
-                </CardHeader>
-                <CardContent className='p-4'>
-                  {twitterId && <TwitterPreview tweetId={twitterId} />}
-                  {bookmark.notes && (
-                    <div className='mt-3 text-sm text-muted-foreground'>
-                      {bookmark.notes}
-                    </div>
-                  )}
                 </CardContent>
-                <CardFooter className='p-4 pt-0 flex justify-between items-center'>
-                  <div className='text-xs text-muted-foreground'>
-                    {formatDistanceToNow(new Date(bookmark.createdAt), {
-                      addSuffix: true,
-                    })}
-                  </div>
-                  <Button variant='ghost' size='sm' asChild>
-                    <a
-                      href={bookmark.url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                    >
-                      <ExternalLink className='h-4 w-4 mr-1' />
-                      Open
-                    </a>
-                  </Button>
-                </CardFooter>
-              </>
-            )}
-          </Card>
-        )
-      })}
-    </div>
+              ) : (
+                <>
+                  <CardHeader className='p-4 pb-0 bg-red-600'>
+                    <div className='flex justify-between items-start'>
+                      <CardTitle className='text-lg'>
+                        {bookmark.title}
+                      </CardTitle>
+                      <div className='flex space-x-1'>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          onClick={() => startEditing(bookmark)}
+                        >
+                          <Edit className='h-4 w-4' />
+                        </Button>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          onClick={() => confirmDelete(bookmark.id)}
+                        >
+                          <Trash className='h-4 w-4' />
+                        </Button>
+                      </div>
+                    </div>
+                    {folderName && (
+                      <Badge variant='outline' className='mt-2'>
+                        {folderName}
+                      </Badge>
+                    )}
+                  </CardHeader>
+                  <CardContent className='p-4'>
+                    {twitterId && <TwitterPreview tweetId={twitterId} />}
+                    {bookmark.notes && (
+                      <div className='mt-3 text-sm text-muted-foreground'>
+                        {bookmark.notes}
+                      </div>
+                    )}
+                  </CardContent>
+                  <CardFooter className='p-4 pt-0 flex justify-between items-center'>
+                    <div className='text-xs text-muted-foreground'>
+                      {formatDistanceToNow(new Date(bookmark.createdAt), {
+                        addSuffix: true,
+                      })}
+                    </div>
+                    <Button variant='ghost' size='sm' asChild>
+                      <a
+                        href={bookmark.url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        <ExternalLink className='h-4 w-4 mr-1' />
+                        Open
+                      </a>
+                    </Button>
+                  </CardFooter>
+                </>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title='Delete Bookmark'
+        description='Are you sure you want to delete this bookmark? This action cannot be undone.'
+        confirmText='Delete'
+        cancelText='Cancel'
+        onConfirm={handleDelete}
+      />
+    </>
   )
 }
