@@ -59,7 +59,6 @@ export function WelcomeBanner() {
                 <li>Organize bookmarks into folders</li>
                 <li>Search and filter your collection</li>
                 <li>Sync across devices without signing up</li>
-                <li>Dark/light mode support</li>
               </ul>
             </AccordionContent>
           </AccordionItem>
