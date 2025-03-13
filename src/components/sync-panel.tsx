@@ -26,6 +26,7 @@ import {
   Smartphone,
 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { toast } from 'sonner'
 
 interface SyncPanelProps {
   bookmarks: Bookmark[]
@@ -63,15 +64,9 @@ export function SyncPanel({ bookmarks, folders }: SyncPanelProps) {
       setSyncUrl(url)
     } catch (error) {
       console.error('Error generating sync URL:', error)
-      {
-        /*
-      toast({
-        title: "Error generating sync URL",
-        description: "Please try again later",
-        variant: "destructive",
+      toast.error('Error generating sync URL', {
+        description: 'Please try again later',
       })
-        */
-      }
     } finally {
       setIsGenerating(false)
     }
@@ -81,14 +76,9 @@ export function SyncPanel({ bookmarks, folders }: SyncPanelProps) {
     navigator.clipboard.writeText(syncUrl)
     setCopied(true)
 
-    {
-      /*
-    toast({
-      title: 'Link copied!',
+    toast('Link copied!', {
       description: 'Share this link to sync your bookmarks across devices',
     })
-        */
-    }
 
     setTimeout(() => setCopied(false), 2000)
   }
@@ -112,14 +102,9 @@ export function SyncPanel({ bookmarks, folders }: SyncPanelProps) {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    {
-      /*
-    toast({
-      title: 'Bookmarks exported!',
+    toast('Bookmarks exported!', {
       description: 'Your bookmarks have been exported as a JSON file',
     })
-    */
-    }
   }
 
   const handleImportFromUrl = () => {
@@ -146,28 +131,17 @@ export function SyncPanel({ bookmarks, folders }: SyncPanelProps) {
       const event = new CustomEvent('vibe:import', { detail: parsed })
       window.dispatchEvent(event)
 
-      {
-        /*
-      toast({
-        title: 'Import successful!',
+      toast('Import successful!', {
         description: `Imported ${parsed.bookmarks.length} bookmarks and ${parsed.folders.length} folders`,
       })
-      */
-      }
 
       setImportUrl('')
     } catch (error) {
       console.error('Error importing data:', error)
 
-      {
-        /*
-      toast({
-        title: 'Import failed',
+      toast.error('Import failed', {
         description: 'The URL provided does not contain valid bookmark data',
-        variant: 'destructive',
       })
-      */
-      }
     }
   }
 
