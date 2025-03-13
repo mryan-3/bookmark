@@ -26,6 +26,7 @@ export function AddBookmarkForm({ onAdd, folders }: AddBookmarkFormProps) {
   const [twitterId, setTwitterId] = useState<string | null>(null)
 
   const handleUrlChange = (value: string) => {
+      console.log(value)
     setUrl(value)
     const id = extractTwitterId(value)
     setIsValidUrl(!!id)

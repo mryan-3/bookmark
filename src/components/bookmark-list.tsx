@@ -140,7 +140,7 @@ export function BookmarkList({
                 </CardContent>
               ) : (
                 <>
-                  <CardHeader className='p-4 pb-0 bg-red-600'>
+                  <CardHeader className='p-4 pb-0'>
                     <div className='flex justify-between items-start'>
                       <CardTitle className='text-lg'>
                         {bookmark.title}
